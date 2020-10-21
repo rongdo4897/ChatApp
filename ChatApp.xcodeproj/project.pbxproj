@@ -13,6 +13,7 @@
 		0A483D2A253EEF8A00B3161A /* VideoPlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A483D29253EEF8A00B3161A /* VideoPlayerViewController.swift */; };
 		0A483D2D253EEFBE00B3161A /* NewConversationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A483D2C253EEFBE00B3161A /* NewConversationViewController.swift */; };
 		0A483D30253EEFDD00B3161A /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A483D2F253EEFDD00B3161A /* ProfileViewController.swift */; };
+		0AB7D29F254009F100DE484C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AB7D29E254009F100DE484C /* Extensions.swift */; };
 		568E51B5253AFE6C006D94ED /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568E51B4253AFE6C006D94ED /* AppDelegate.swift */; };
 		568E51B7253AFE6C006D94ED /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568E51B6253AFE6C006D94ED /* SceneDelegate.swift */; };
 		568E51B9253AFE6C006D94ED /* ConversationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568E51B8253AFE6C006D94ED /* ConversationViewController.swift */; };
@@ -28,6 +29,7 @@
 		0A483D29253EEF8A00B3161A /* VideoPlayerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerViewController.swift; sourceTree = "<group>"; };
 		0A483D2C253EEFBE00B3161A /* NewConversationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewConversationViewController.swift; sourceTree = "<group>"; };
 		0A483D2F253EEFDD00B3161A /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
+		0AB7D29E254009F100DE484C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		568E51B1253AFE6C006D94ED /* ChatApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChatApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		568E51B4253AFE6C006D94ED /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		568E51B6253AFE6C006D94ED /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -53,8 +55,7 @@
 			isa = PBXGroup;
 			children = (
 				568E51B8253AFE6C006D94ED /* ConversationViewController.swift */,
-				0A483D20253EEF3000B3161A /* LoginViewController.swift */,
-				0A483D23253EEF4B00B3161A /* RegisterViewController.swift */,
+				0AB7D29C253FD62500DE484C /* Login */,
 				0A483D26253EEF7200B3161A /* PhotoViewController.swift */,
 				0A483D29253EEF8A00B3161A /* VideoPlayerViewController.swift */,
 				0A483D2C253EEFBE00B3161A /* NewConversationViewController.swift */,
@@ -91,6 +92,7 @@
 			children = (
 				568E51B4253AFE6C006D94ED /* AppDelegate.swift */,
 				568E51B6253AFE6C006D94ED /* SceneDelegate.swift */,
+				0AB7D29E254009F100DE484C /* Extensions.swift */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -102,6 +104,15 @@
 				568E51BF253AFE6F006D94ED /* LaunchScreen.storyboard */,
 			);
 			path = Storyboards;
+			sourceTree = "<group>";
+		};
+		0AB7D29C253FD62500DE484C /* Login */ = {
+			isa = PBXGroup;
+			children = (
+				0A483D20253EEF3000B3161A /* LoginViewController.swift */,
+				0A483D23253EEF4B00B3161A /* RegisterViewController.swift */,
+			);
+			path = Login;
 			sourceTree = "<group>";
 		};
 		568E51A8253AFE6C006D94ED = {
@@ -208,6 +219,7 @@
 				0A483D2D253EEFBE00B3161A /* NewConversationViewController.swift in Sources */,
 				568E51B9253AFE6C006D94ED /* ConversationViewController.swift in Sources */,
 				0A483D2A253EEF8A00B3161A /* VideoPlayerViewController.swift in Sources */,
+				0AB7D29F254009F100DE484C /* Extensions.swift in Sources */,
 				568E51B5253AFE6C006D94ED /* AppDelegate.swift in Sources */,
 				0A483D30253EEFDD00B3161A /* ProfileViewController.swift in Sources */,
 				568E51B7253AFE6C006D94ED /* SceneDelegate.swift in Sources */,
