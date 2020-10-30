@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 class RegisterViewController: UIViewController {
     
@@ -17,9 +18,12 @@ class RegisterViewController: UIViewController {
     
     private let imageView: UIImageView = {
         let image = UIImageView()
-        image.image = UIImage(systemName: "person")
+        image.image = UIImage(systemName: "person.circle")
         image.tintColor = .gray
         image.contentMode = .scaleAspectFit
+        image.layer.masksToBounds = true
+        image.layer.borderWidth = 2
+        image.layer.borderColor = #colorLiteral(red: 0.6000000238, green: 0.6000000238, blue: 0.6000000238, alpha: 1)
         return image
     }()
     
@@ -41,7 +45,6 @@ class RegisterViewController: UIViewController {
         pass.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 5, height: pass.height))
         pass.leftViewMode = .always
         pass.backgroundColor = .white
-        pass.isSecureTextEntry = true
         return pass
     }()
     
@@ -63,7 +66,6 @@ class RegisterViewController: UIViewController {
         pass.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 5, height: pass.height))
         pass.leftViewMode = .always
         pass.backgroundColor = .white
-        pass.isSecureTextEntry = true
         return pass
     }()
     
@@ -139,6 +141,9 @@ class RegisterViewController: UIViewController {
         scrollView.addSubview(passwordField)
         scrollView.addSubview(loginButton)
         
+        imageView.isUserInteractionEnabled = true
+        scrollView.isUserInteractionEnabled = true
+        
         // hiden keyboard when tap screen
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(tapOnScreen))
         scrollView.addGestureRecognizer(tapGestureRecognizer)
@@ -151,7 +156,13 @@ class RegisterViewController: UIViewController {
         
         // login button action
         loginButton.addTarget(self, action: #selector(btnRegisterTapped), for: .touchUpInside)
+        
+        // imageview tapped
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(didTapChangeProfilePic))
+        imageView.addGestureRecognizer(gesture)
     }
+    
+    
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -161,6 +172,8 @@ class RegisterViewController: UIViewController {
                                  y: 10,
                                  width: size,
                                  height: size)
+        
+        imageView.layer.cornerRadius = imageView.width / 2
         
         firstNameField.frame = CGRect(x: 30,
                                       y: imageView.bottom + 30,
@@ -189,7 +202,15 @@ class RegisterViewController: UIViewController {
         
     }
     
-    // tap login button
+    /// - Alert Input all abtribute
+    func alertUserLoginError(title:String , messeage:String){
+        let alert = UIAlertController(title: title, message: messeage, preferredStyle: .alert)
+        let alertItemOK = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+        alert.addAction(alertItemOK)
+        present(alert, animated: true)
+    }
+    
+    /// - tap login button
     @objc private func btnRegisterTapped(){
         firstNameField.resignFirstResponder()
         lastNameField.resignFirstResponder()
@@ -205,13 +226,35 @@ class RegisterViewController: UIViewController {
             alertUserLoginError(title: "", messeage: "Please enter full information create new account and password length more than 6 !")
             return
         }
+        
+        /// - Check database
+        DatabaseManager.shared.checkUserExists(with: email) { [weak self] (exists) in
+            guard let strongself = self else {
+                return
+            }
+            
+            guard !exists else {
+                // user already exists
+                strongself.alertUserLoginError(title: "", messeage: "Email is already exists")
+                return
+            }
+            
+            /// - Firebase Register
+            FirebaseAuth.Auth.auth().createUser(withEmail: email, password: pass) { (authResult, error) in
+                guard authResult != nil , error == nil else {
+                    return
+                }
+                
+                let user = ChatAppUser(firstName: first, lastName: last, emailAddress: email)
+                
+                DatabaseManager.shared.insertUser(with: user)
+                strongself.navigationController?.dismiss(animated: true, completion: nil)
+            }
+        }
     }
     
-    func alertUserLoginError(title:String , messeage:String){
-        let alert = UIAlertController(title: title, message: messeage, preferredStyle: .alert)
-        let alertItemOK = UIAlertAction(title: "OK", style: .cancel, handler: nil)
-        alert.addAction(alertItemOK)
-        present(alert, animated: true)
+    @objc func didTapChangeProfilePic(){
+        presentPhotoActionSheet()
     }
     
     @objc private func didTapBack(){
@@ -248,5 +291,62 @@ extension RegisterViewController : UITextFieldDelegate {
             btnRegisterTapped()
         }
         return true
+    }
+}
+
+extension RegisterViewController:UIImagePickerControllerDelegate , UINavigationControllerDelegate{
+    
+    /// - click image view
+    func presentPhotoActionSheet(){
+        let actionSheet = UIAlertController(title: "Profile Picture",
+                                            message: "How would you like to select a picture?",
+                                            preferredStyle: .actionSheet)
+        actionSheet.addAction(UIAlertAction(title: "Cancel",
+                                            style: .cancel,
+                                            handler: nil))
+        actionSheet.addAction(UIAlertAction(title: "Take Photo",
+                                            style: .default,
+                                            handler: { [weak self] _ in
+                                                self?.presentCamera()
+                                            }))
+        actionSheet.addAction(UIAlertAction(title: "Choose Photo",
+                                            style: .default,
+                                            handler: { [weak self] _ in
+                                                self?.presentPhotoPicker()
+                                            }))
+        
+        present(actionSheet, animated: true)
+    }
+    
+    /// - click Take photo in alert
+    func presentCamera(){
+        let vc = UIImagePickerController()
+        vc.sourceType = .camera
+        vc.delegate = self
+        vc.allowsEditing = true
+        present(vc, animated: true)
+    }
+    
+    /// - click Choose Photo in alert
+    func presentPhotoPicker(){
+        let vc = UIImagePickerController()
+        vc.sourceType = .photoLibrary
+        vc.delegate = self
+        vc.allowsEditing = true
+        present(vc, animated: true)
+    }
+    
+    /// - Picker cancel
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion: nil)
+    }
+    
+    /// - return photo when finished picker
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true, completion: nil)
+        guard let selectedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage else {
+            return
+        }
+        self.imageView.image = selectedImage
     }
 }

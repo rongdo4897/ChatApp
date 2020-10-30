@@ -6,6 +6,9 @@
 //
 
 import UIKit
+import FirebaseAuth
+import FBSDKLoginKit
+import GoogleSignIn
 
 class LoginViewController: UIViewController {
     
@@ -76,8 +79,30 @@ class LoginViewController: UIViewController {
         return button
     }()
     
+    private let loginFacebookButton:FBLoginButton = {
+        let button = FBLoginButton()
+        button.permissions = ["email,public_profile"]
+        return button
+    }()
+    
+    private let loginGoogleButton = GIDSignInButton()
+    
+    private var loginObserver:NSObjectProtocol?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        loginObserver = NotificationCenter.default.addObserver(forName: .didLoginNotification,
+                                               object: nil,
+                                               queue: .main) { [weak self] (_) in
+            guard let strongSelf = self else {
+                return
+            }
+            strongSelf.navigationController?.dismiss(animated: true, completion: nil)
+        }
+        
+        GIDSignIn.sharedInstance()?.presentingViewController = self
+        
         navigationItem.title = "Login"
         view.backgroundColor = .white
         
@@ -86,12 +111,16 @@ class LoginViewController: UIViewController {
                                                             target: self,
                                                             action: #selector(didTapRegister))
         
+        loginFacebookButton.delegate = self
+        
         // Add subview
         view.addSubview(scrollView)
         scrollView.addSubview(imageView)
         scrollView.addSubview(emailField)
         scrollView.addSubview(passwordField)
         scrollView.addSubview(loginButton)
+        scrollView.addSubview(loginFacebookButton) //login facebook
+        scrollView.addSubview(loginGoogleButton)
         
         // hiden keyboard when tap screen
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(tapOnScreen))
@@ -103,6 +132,13 @@ class LoginViewController: UIViewController {
         
         // login button action
         loginButton.addTarget(self, action: #selector(btnLoginTapped), for: .touchUpInside)
+        
+    }
+    
+    deinit {
+        if let observer = loginObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
     
     override func viewDidLayoutSubviews() {
@@ -126,9 +162,18 @@ class LoginViewController: UIViewController {
         
         loginButton.frame = CGRect(x: 30,
                                    y: passwordField.bottom + 10,
-                                     width: scrollView.width - 60,
-                                     height: 52)
-
+                                   width: scrollView.width - 60,
+                                   height: 52)
+        
+        loginFacebookButton.frame = CGRect(x: 30,
+                                           y: loginButton.bottom + 10,
+                                           width: scrollView.width - 60,
+                                           height: 52)
+        
+        loginGoogleButton.frame = CGRect(x: 30,
+                                           y: loginFacebookButton.bottom + 10,
+                                           width: scrollView.width - 60,
+                                           height: 52)
     }
     
     // tap login button
@@ -140,6 +185,23 @@ class LoginViewController: UIViewController {
               !email.isEmpty , !pass.isEmpty , pass.count >= 6 else {
             alertUserLoginError(title: "", messeage: "Please enter full information login and password length more than 6 !")
             return
+        }
+        
+        /// - Firebase Login
+        FirebaseAuth.Auth.auth().signIn(withEmail: email, password: pass) { [weak self] (authResult, error) in
+            guard let strongSelf = self else {
+                return
+            }
+            
+            guard let result = authResult , error == nil else {
+                return
+            }
+            
+            let user = result.user
+            print(user)
+            
+            /// - If exist -> dismiss 
+            strongSelf.navigationController?.dismiss(animated: true, completion: nil)
         }
     }
     
@@ -159,12 +221,13 @@ class LoginViewController: UIViewController {
     
     // Hide keyboard when tap out textfield
     @objc func tapOnScreen() {
-    emailField.resignFirstResponder()
-    passwordField.resignFirstResponder()
+        emailField.resignFirstResponder()
+        passwordField.resignFirstResponder()
     }
     
 }
 
+//MARK: - TextField delegate
 extension LoginViewController : UITextFieldDelegate {
     
     //Hỏi người được ủy quyền có xử lý việc nhấn nút Quay lại cho trường văn bản hay không.
@@ -179,5 +242,74 @@ extension LoginViewController : UITextFieldDelegate {
             btnLoginTapped()
         }
         return true
+    }
+}
+
+//MARK: - Login button delegate
+extension LoginViewController : LoginButtonDelegate {
+    func loginButtonDidLogOut(_ loginButton: FBLoginButton) {
+        // no operation
+    }
+    
+    func loginButton(_ loginButton: FBLoginButton, didCompleteWith result: LoginManagerLoginResult?, error: Error?) {
+        guard let token = result?.token?.tokenString else {
+            debugPrint("User failed to login facebook")
+            return
+        }
+        
+        /// - facebook request
+        let facebookRequest = FBSDKLoginKit.GraphRequest(graphPath: "me",
+                                                         parameters: ["fields":"email,name"],
+                                                         tokenString: token,
+                                                         version: nil,
+                                                         httpMethod: .get)
+        
+        facebookRequest.start { (connection, result, error) in
+            guard let result = result as? [String:Any], error == nil else {
+                debugPrint("Failed to make facebook graph request")
+                return
+            }
+            
+            guard let userName = result["name"] as? String ,
+                  let email = result["email"] as? String else {
+                
+                debugPrint("Fail to get email and name from fb result")
+                return
+            }
+            
+            let nameComponents = userName.components(separatedBy: " ")
+            guard nameComponents.count == 2 else {
+                return
+            }
+            
+            let firstName = nameComponents[0]
+            let lastName = nameComponents[1]
+            
+            DatabaseManager.shared.checkUserExists(with: email) { (exists) in
+                if !exists {
+                    DatabaseManager.shared.insertUser(with: ChatAppUser(firstName: firstName,
+                                                                        lastName: lastName,
+                                                                        emailAddress: email))
+                }
+            }
+            
+            /// - credential
+            let credential = FacebookAuthProvider.credential(withAccessToken: token)
+            FirebaseAuth.Auth.auth().signIn(with: credential) { [weak self] (authResult, error) in
+                guard let strongSelf = self else {
+                    return
+                }
+                
+                guard authResult != nil , error == nil else {
+                    if let error = error {
+                        debugPrint("Facebook login failed - \(error)")
+                    }
+                    return
+                }
+                
+                debugPrint("Successfully logged user in facebook")
+                strongSelf.navigationController?.dismiss(animated: true, completion: nil)
+            }
+        }
     }
 }
