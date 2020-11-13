@@ -10,9 +10,15 @@ import JGProgressHUD
 
 class NewConversationViewController: UIViewController {
     
+    /// - Truyền dữ liệu về màn hình ConversationViewController
+    public var completion: (([String: String]) -> (Void))?
+    
+    /// - Progress spinner
     private let spinner = JGProgressHUD(style: .dark)
     
+    /// - Danh sách User trên database
     private var users = [[String: String]]() // all users
+    /// - Danh sách User trả về khi tìm kiếm
     private var results = [[String: String]]() // result did when search
     private var hasFetched = false
     
@@ -22,7 +28,7 @@ class NewConversationViewController: UIViewController {
         return search
     }()
     
-    /// - table display result
+    /// - Table hiển thị kết quả tìm kiếm
     private let tableView:UITableView = {
         let table = UITableView()
         table.isHidden = true
@@ -30,7 +36,7 @@ class NewConversationViewController: UIViewController {
         return table
     }()
     
-    /// - label no result
+    /// - label không có kểt quả trả về
     private let noResultLabel:UILabel = {
         let label = UILabel()
         label.isHidden = true
@@ -89,8 +95,13 @@ extension NewConversationViewController : UITableViewDelegate , UITableViewDataS
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        // Start conversation
-        
+        // Bắt đầu cuộc trò chuyện (Click row table view)
+        let targetUserData = results[indexPath.row]
+        // click xong truyền dữ liệu rồi ẩn màn hình
+        dismiss(animated: true) { [weak self] in
+            // Gán dữ liệu cho closure completion để truyền về màn hình trước đó
+            self?.completion?(targetUserData)
+        }
     }
 }
 
@@ -109,15 +120,15 @@ extension NewConversationViewController : UISearchBarDelegate {
         self.searchUsers(query: text)
     }
     
-    /// - Search users
+    /// - Tìm kiếm User
     func searchUsers(query: String) {
-        // check if array has firebase results
+        // kiểm tra xem mảng có kết quả firebase không
         if hasFetched {
-            // if it does: filter
+            // Nếu nó có -> Lọc kết quả
             filterUsers(with: query)
             
         } else {
-            // if not, fetch then filter
+            // nếu không, hãy tìm nạp rồi lọc
             DatabaseManager.shared.getAllUsers { [weak self] (result) in
                 switch result {
                 case .success(let usersCollection):
@@ -131,15 +142,16 @@ extension NewConversationViewController : UISearchBarDelegate {
         }
     }
     
-    /// - Results return did search
+    /// - Trả về kết quả tìm kiếm sau khi search
     func filterUsers(with term: String) {
-        // update the UI: show results or no results label
+        // Cập nhật UI: Hiển thị kết quả hoặc hiển thị lable no results
         guard hasFetched else {
             return
         }
         
         self.spinner.dismiss()
         
+        // lấy kết qủa tìm kiếm
         let results: [[String: String]] = self.users.filter({
             guard let name = $0["name"]?.lowercased() else {
                 return false
@@ -154,7 +166,7 @@ extension NewConversationViewController : UISearchBarDelegate {
         updateUI()
     }
     
-    /// - Update UI
+    /// - Cập nhật UI
     func updateUI() {
         if results.isEmpty {
             self.noResultLabel.isHidden = false
