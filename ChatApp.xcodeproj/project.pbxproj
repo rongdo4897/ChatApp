@@ -18,6 +18,7 @@
 		0A73C304254A77BB00C2C950 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A73C303254A77BB00C2C950 /* DatabaseManager.swift */; };
 		0AA0619025467845007CA70D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0AA0618F25467844007CA70D /* GoogleService-Info.plist */; };
 		0AB7D29F254009F100DE484C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AB7D29E254009F100DE484C /* Extensions.swift */; };
+		0AC51BC92570DAD0004411BA /* ConversationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC51BC82570DAD0004411BA /* ConversationTableViewCell.swift */; };
 		568E51B5253AFE6C006D94ED /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568E51B4253AFE6C006D94ED /* AppDelegate.swift */; };
 		568E51B7253AFE6C006D94ED /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568E51B6253AFE6C006D94ED /* SceneDelegate.swift */; };
 		568E51B9253AFE6C006D94ED /* ConversationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568E51B8253AFE6C006D94ED /* ConversationViewController.swift */; };
@@ -39,6 +40,7 @@
 		0A73C303254A77BB00C2C950 /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
 		0AA0618F25467844007CA70D /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		0AB7D29E254009F100DE484C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		0AC51BC82570DAD0004411BA /* ConversationTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationTableViewCell.swift; sourceTree = "<group>"; };
 		191010A8E9563F043D66608D /* Pods_ChatApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ChatApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		568E51B1253AFE6C006D94ED /* ChatApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChatApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		568E51B4253AFE6C006D94ED /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -83,6 +85,7 @@
 			children = (
 				0A483D1E253EEDB900B3161A /* Storyboards */,
 				568E51BD253AFE6F006D94ED /* Assets.xcassets */,
+				0AC51BC82570DAD0004411BA /* ConversationTableViewCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -323,6 +326,7 @@
 				568E51B5253AFE6C006D94ED /* AppDelegate.swift in Sources */,
 				0A483D30253EEFDD00B3161A /* ProfileViewController.swift in Sources */,
 				568E51B7253AFE6C006D94ED /* SceneDelegate.swift in Sources */,
+				0AC51BC92570DAD0004411BA /* ConversationTableViewCell.swift in Sources */,
 				0A5BE5E9254FB570009D1FA6 /* ChatViewController.swift in Sources */,
 				0A483D27253EEF7200B3161A /* PhotoViewController.swift in Sources */,
 				0A5BE608254FE828009D1FA6 /* StorageManager.swift in Sources */,
