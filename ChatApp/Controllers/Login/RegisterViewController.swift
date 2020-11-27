@@ -11,14 +11,17 @@ import JGProgressHUD
 
 class RegisterViewController: UIViewController {
     
+    // spinner
     private let spinner = JGProgressHUD(style: .dark)
     
+    // scroll view
     private let scrollView: UIScrollView = {
         let scroll = UIScrollView()
         scroll.clipsToBounds = true
         return scroll
     }()
     
+    // image profile
     private let imageView: UIImageView = {
         let image = UIImageView()
         image.image = UIImage(systemName: "person.circle")
@@ -30,6 +33,7 @@ class RegisterViewController: UIViewController {
         return image
     }()
     
+    // first name
     private let firstNameField: UITextField = {
         let pass = UITextField()
         // Tự động viết hoa
@@ -51,6 +55,7 @@ class RegisterViewController: UIViewController {
         return pass
     }()
     
+    // last name
     private let lastNameField: UITextField = {
         let pass = UITextField()
         // Tự động viết hoa
@@ -72,6 +77,7 @@ class RegisterViewController: UIViewController {
         return pass
     }()
     
+    // email
     private let emailField: UITextField = {
         let email = UITextField()
         // Tự động viết hoa
@@ -93,6 +99,7 @@ class RegisterViewController: UIViewController {
         return email
     }()
     
+    // password
     private let passwordField: UITextField = {
         let pass = UITextField()
         // Tự động viết hoa
@@ -115,6 +122,7 @@ class RegisterViewController: UIViewController {
         return pass
     }()
     
+    // Nút đăng kí
     private let loginButton: UIButton = {
         let button = UIButton()
         button.setTitle("Register", for: .normal)
@@ -151,16 +159,16 @@ class RegisterViewController: UIViewController {
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(tapOnScreen))
         scrollView.addGestureRecognizer(tapGestureRecognizer)
         
-        // delegate textfield
+        // Ủy quyền Text field
         firstNameField.delegate = self
         lastNameField.delegate = self
         emailField.delegate = self
         passwordField.delegate = self
         
-        // login button action
+        // Bắt sự kiện chạm nút đăng kí
         loginButton.addTarget(self, action: #selector(btnRegisterTapped), for: .touchUpInside)
         
-        // imageview tapped
+        // Bắt sự kiện chạm ảnh
         let gesture = UITapGestureRecognizer(target: self, action: #selector(didTapChangeProfilePic))
         imageView.addGestureRecognizer(gesture)
     }
@@ -205,7 +213,7 @@ class RegisterViewController: UIViewController {
         
     }
     
-    /// - Alert Input all abtribute
+    /// -   Hộp thoại cảnh báo đăng nhập lỗi
     func alertUserLoginError(title:String , messeage:String){
         let alert = UIAlertController(title: title, message: messeage, preferredStyle: .alert)
         let alertItemOK = UIAlertAction(title: "OK", style: .cancel, handler: nil)
@@ -213,7 +221,7 @@ class RegisterViewController: UIViewController {
         present(alert, animated: true)
     }
     
-    /// - tap login button
+    /// - Chạm nút login
     @objc private func btnRegisterTapped(){
         firstNameField.resignFirstResponder()
         lastNameField.resignFirstResponder()
@@ -232,42 +240,43 @@ class RegisterViewController: UIViewController {
         
         spinner.show(in: view)
         
-        /// - Check database
+        /// - Kiểm tra database xem đã tồn tại hay chưa
         DatabaseManager.shared.checkUserExists(with: email) { [weak self] (exists) in
             guard let strongself = self else {
                 return
             }
-            
+            // ẩn spinner
             DispatchQueue.main.async {
                 strongself.spinner.dismiss()
             }
-            
+        
             guard !exists else {
-                // user already exists
-                strongself.alertUserLoginError(title: "", messeage: "Email is already exists")
+                // nếu nó tồn tại
+                strongself.alertUserLoginError(title: "", messeage: "Email is already exists") // thông báo lỗi
                 return
             }
             
-            /// - Firebase Register
+            // Nếu chưa thì tiến hành đăng kí trên firebase auth
             FirebaseAuth.Auth.auth().createUser(withEmail: email, password: pass) { (authResult, error) in
+                /// - kiếm tra xem kết quả trả về có Khác rỗng và có tồn tại lỗi hay không
                 guard authResult != nil , error == nil else {
                     return
                 }
-                
+                // nếu không có vấn đề gì xảy ra -> tạo tài khoản trên realtime database
                 let chatUser = ChatAppUser(firstName: first, lastName: last, emailAddress: email)
                 DatabaseManager.shared.insertUser(with: chatUser) { (success) in
-                    if success {
+                    if success { // nếu thành công
                         /// - upload image
-                        guard let image = strongself.imageView.image , let data = image.pngData() else {
+                        guard let image = strongself.imageView.image , let data = image.pngData() else { // có tồn tại ảnh và chuyển ảnh về dạng data
                             return
                         }
-                        // file name
+                        // đường dẫn ảnh "\(safeEmail)_profile_picture.png"
                         let fileName = chatUser.profilePictureFileName
-                        // upload image to database
+                        // upload image lên database trên mục Storage
                         StorageManager.share.uploadProfilePicture(with: data, fileName: fileName) { (result) in
-                            switch result {
-                            case .success(let downloadUrl):
-                                // user default url image
+                            switch result { // kết quả trả về
+                            case .success(let downloadUrl): // thành công
+                                // Lưu Url image vào user default
                                 UserDefaults.standard.set(downloadUrl, forKey: "profile_picture_url")
                             case .failure(let error):
                                 print("Storage manager error: \(error)")
@@ -275,6 +284,7 @@ class RegisterViewController: UIViewController {
                         }
                     }
                 }
+                // khi tiến hành xong thì về màn hình chính
                 strongself.navigationController?.dismiss(animated: true, completion: nil)
             }
         }
@@ -285,6 +295,7 @@ class RegisterViewController: UIViewController {
     }
     
     @objc private func didTapBack(){
+        // quay lại màn đăng nhập
         navigationController?.popViewController(animated: true)
     }
     

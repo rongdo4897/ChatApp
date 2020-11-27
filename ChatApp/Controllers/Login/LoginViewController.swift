@@ -13,14 +13,17 @@ import JGProgressHUD
 
 class LoginViewController: UIViewController {
     
+    // spinner
     private let spinner = JGProgressHUD(style: .dark)
     
+    // scrollview
     private let scrollView: UIScrollView = {
         let scroll = UIScrollView()
         scroll.clipsToBounds = true
         return scroll
     }()
     
+    // image logo
     private let imageView: UIImageView = {
         let image = UIImageView()
         image.image = UIImage(named: "logo")
@@ -28,6 +31,7 @@ class LoginViewController: UIViewController {
         return image
     }()
     
+    // email
     private let emailField: UITextField = {
         let email = UITextField()
         // Tự động viết hoa
@@ -49,6 +53,7 @@ class LoginViewController: UIViewController {
         return email
     }()
     
+    // password
     private let passwordField: UITextField = {
         let pass = UITextField()
         // Tự động viết hoa
@@ -71,6 +76,7 @@ class LoginViewController: UIViewController {
         return pass
     }()
     
+    // button login
     private let loginButton: UIButton = {
         let button = UIButton()
         button.setTitle("Login", for: .normal)
@@ -82,12 +88,14 @@ class LoginViewController: UIViewController {
         return button
     }()
     
+    // button login facebook
     private let loginFacebookButton:FBLoginButton = {
         let button = FBLoginButton()
         button.permissions = ["email,public_profile"]
         return button
     }()
     
+    // button login google
     private let loginGoogleButton = GIDSignInButton()
     
     private var loginObserver:NSObjectProtocol?
